@@ -3,12 +3,12 @@ package com.xxmicloxx.NoteBlockAPI;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -181,6 +181,71 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	public void doAsync(Runnable runnable) {
 		getServer().getScheduler().runTaskAsynchronously(this, runnable);
+	}
+
+	private ExecutorService submit = Executors.newSingleThreadExecutor(
+			new ThreadFactoryBuilder().setNameFormat("NoteBlockAPI Music #%1$d").build()
+	);
+	private Future<?> commonTask;
+
+	private List<Delayed> delayeds = new LinkedList<>();
+
+	{
+		this.runCommonTaskIfNotExists();
+	}
+
+	private void runCommonTaskIfNotExists() {
+		if (commonTask != null && !commonTask.isDone()) {
+			return;
+		}
+
+		commonTask = this.submit.submit(() -> {
+			while (true) {
+				if (delayeds.isEmpty()) {
+					break;
+				}
+
+				try {
+					long minNextTime = -1;
+					for (Iterator<Delayed> iterator = delayeds.iterator(); iterator.hasNext(); ) {
+						Delayed delayed = iterator.next();
+						if (delayed.isDone()) {
+							iterator.remove();
+						} else {
+							long current = System.currentTimeMillis();
+							if (current >= delayed.nextTimePlay()) {
+								delayed.play();
+							}
+							minNextTime = minNextTime == -1 ?
+									delayed.nextTimePlay() :
+									Math.min(minNextTime, delayed.nextTimePlay());
+						}
+					}
+
+					long current = System.currentTimeMillis();
+					if (minNextTime > current) {
+						Thread.sleep(minNextTime - current);
+					}
+				} catch (InterruptedException e) {
+					break;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	public void doDelayed(Delayed delayed) {
+		this.delayeds.add(delayed);
+		this.runCommonTaskIfNotExists();
+	}
+
+	public interface Delayed {
+		void play() throws InterruptedException;
+
+		long nextTimePlay();
+
+		boolean isDone();
 	}
 
 	public boolean isDisabling() {

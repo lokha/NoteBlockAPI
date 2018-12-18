@@ -3,13 +3,10 @@ package com.xxmicloxx.NoteBlockAPI;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -235,13 +232,25 @@ public abstract class SongPlayer {
 	 * Starts this SongPlayer
 	 */
 	private void start() {
-		plugin.doAsync(() -> {
-			while (!destroyed) {
+		plugin.doDelayed(new NoteBlockAPI.Delayed() {
+			private long nextTimePlay = -1;
+
+			@Override
+			public void play() {
 				long startTime = System.currentTimeMillis();
 				lock.lock();
 				try {
 					if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
-						break;
+						return;
+					}
+
+					List<Player> online = playerList.keySet().stream()
+							.map(Bukkit::getPlayerExact)
+							.filter(Objects::nonNull)
+							.collect(Collectors.toList());
+					if (online.isEmpty() && !playerList.isEmpty()) {
+						destroy();
+						return;
 					}
 
 					if (playing) {
@@ -255,20 +264,13 @@ public abstract class SongPlayer {
 							if (autoDestroy) {
 								destroy();
 							}
-							continue;
+							return;
 						}
 						CallUpdate("tick", tick);
 
-						plugin.doSync(() -> {
-							for (String s : playerList.keySet()) {
-	                            Player p = Bukkit.getPlayerExact(s);
-	                            if (p == null) {
-	                                // offline...
-	                                continue;
-	                            }
-	                            playTick(p, tick);
-							}
-						});
+						for (Player p : online) {
+							playTick(p, tick);
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -277,18 +279,25 @@ public abstract class SongPlayer {
 				}
 
 				if (destroyed) {
-					break;
+					return;
 				}
 
-				long duration = System.currentTimeMillis() - startTime;
+
+				long current = System.currentTimeMillis();
+				long duration = current - startTime;
 				float delayMillis = song.getDelay() * 50;
-				if (duration < delayMillis) {
-					try {
-						Thread.sleep((long) (delayMillis - duration));
-					} catch (InterruptedException e) {
-						// do nothing
-					}
-				}
+
+				nextTimePlay = current + (long) (delayMillis - duration);
+			}
+
+			@Override
+			public long nextTimePlay() {
+				return nextTimePlay;
+			}
+
+			@Override
+			public boolean isDone() {
+				return destroyed || NoteBlockAPI.getAPI().isDisabling();
 			}
 		});
 	}

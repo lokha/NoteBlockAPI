@@ -3,15 +3,10 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -277,13 +272,25 @@ public abstract class SongPlayer {
 	 * Starts this SongPlayer
 	 */
 	private void start() {
-		plugin.doAsync(() -> {
-			while (!destroyed) {
+		plugin.doDelayed(new NoteBlockAPI.Delayed() {
+			private long nextTimePlay = -1;
+
+			@Override
+			public void play() {
 				long startTime = System.currentTimeMillis();
 				lock.lock();
 				try {
 					if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
-						break;
+						return;
+					}
+
+					List<Player> online = playerList.keySet().stream()
+							.map(Bukkit::getPlayer)
+							.filter(Objects::nonNull)
+							.collect(Collectors.toList());
+					if (online.isEmpty() && !playerList.isEmpty()) {
+						destroy();
+						return;
 					}
 
 					if (playing) {
@@ -299,7 +306,7 @@ public abstract class SongPlayer {
 								volume = (byte) fade;
 							}
 						}
-						
+
 						tick++;
 						if (tick > song.getLength()) {
 							tick = -1;
@@ -310,42 +317,35 @@ public abstract class SongPlayer {
 								actualSong++;
 								song = playlist.get(actualSong);
 								CallUpdate("song", song);
-								SongNextEvent event = new SongNextEvent(this);
+								SongNextEvent event = new SongNextEvent(SongPlayer.this);
 								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-								continue;
+								return;
 							} else{
 								actualSong = 0;
 								song = playlist.get(actualSong);
 								CallUpdate("song", song);
 								if (loop){
-									SongLoopEvent event = new SongLoopEvent(this);
+									SongLoopEvent event = new SongLoopEvent(SongPlayer.this);
 									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-									
+
 									if (!event.isCancelled()){
-										continue;
+										return;
 									}
 								}
 							}
 							playing = false;
-							SongEndEvent event = new SongEndEvent(this);
+							SongEndEvent event = new SongEndEvent(SongPlayer.this);
 							plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 							if (autoDestroy) {
 								destroy();
 							}
-							continue;
+							return;
 						}
 						CallUpdate("tick", tick);
-						
-						plugin.doSync(() -> {
-							for (UUID uuid : playerList.keySet()) {
-								Player player = Bukkit.getPlayer(uuid);
-								if (player == null) {
-									// offline...
-									continue;
-								}
-								playTick(player, tick);
-							}
-						});
+
+						for (Player player : online) {
+							playTick(player, tick);
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -354,18 +354,24 @@ public abstract class SongPlayer {
 				}
 
 				if (destroyed) {
-					break;
+					return;
 				}
 
-				long duration = System.currentTimeMillis() - startTime;
+				long current = System.currentTimeMillis();
+				long duration = current - startTime;
 				float delayMillis = song.getDelay() * 50;
-				if (duration < delayMillis) {
-					try {
-						Thread.sleep((long) (delayMillis - duration));
-					} catch (InterruptedException e) {
-						// do nothing
-					}
-				}
+
+				nextTimePlay = current + (long) (delayMillis - duration);
+			}
+
+			@Override
+			public long nextTimePlay() {
+				return nextTimePlay;
+			}
+
+			@Override
+			public boolean isDone() {
+				return destroyed || NoteBlockAPI.getAPI().isDisabling();
 			}
 		});
 	}

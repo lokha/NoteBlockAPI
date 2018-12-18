@@ -1,10 +1,12 @@
 package com.xxmicloxx.NoteBlockAPI;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -16,7 +18,7 @@ public class NoteBlockPlayerMain {
 
 	public static NoteBlockPlayerMain plugin;
 
-	public Map<String, ArrayList<SongPlayer>> playingSongs = 
+	public Map<String, ArrayList<SongPlayer>> playingSongs =
 			Collections.synchronizedMap(new HashMap<String, ArrayList<SongPlayer>>());
 	public Map<String, Byte> playerVolume = Collections.synchronizedMap(new HashMap<String, Byte>());
 
@@ -28,7 +30,7 @@ public class NoteBlockPlayerMain {
 	 * @return is receiving a song
 	 */
 	public static boolean isReceivingSong(Player player) {
-		return ((plugin.playingSongs.get(player.getUniqueId()) != null) 
+		return ((plugin.playingSongs.get(player.getUniqueId()) != null)
 				&& (!plugin.playingSongs.get(player.getUniqueId()).isEmpty()));
 	}
 
@@ -68,12 +70,12 @@ public class NoteBlockPlayerMain {
 		}
 		return byteObj;
 	}
-	
+
 	public void onEnable() {
 		plugin = this;
 	}
-	
-	public void onDisable() {    	
+
+	public void onDisable() {
 		disabling = true;
 	}
 
@@ -85,8 +87,11 @@ public class NoteBlockPlayerMain {
 		Bukkit.getServer().getScheduler().runTaskAsynchronously(NoteBlockAPI.getAPI(), runnable);
 	}
 
+	public void doDelayed(NoteBlockAPI.Delayed delayed) {
+		NoteBlockAPI.getAPI().doDelayed(delayed);
+	}
+
 	public boolean isDisabling() {
 		return disabling;
 	}
-	
 }
