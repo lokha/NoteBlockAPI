@@ -19,7 +19,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
-import com.xxmicloxx.NoteBlockAPI.utils.Updater;
 
 /**
  * Main class; contains methods for playing and adjusting songs for players
@@ -150,20 +149,6 @@ public class NoteBlockAPI extends JavaPlugin {
 			    }));
 			}
 		}, 1);
-		
-		getServer().getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					if (Updater.checkUpdate("19287", getDescription().getVersion())){
-						Bukkit.getLogger().info(String.format("[%s] New update available!", plugin.getDescription().getName()));
-					}
-				} catch (IOException e) {
-					Bukkit.getLogger().info(String.format("[%s] Cannot receive update from Spigot resource page!", plugin.getDescription().getName()));
-				}
-			}
-		}, 20*10);
 		
 		new MathUtils();
 	}
