@@ -61,27 +61,26 @@ public abstract class SongPlayer {
 		song = createSongFromNew(songPlayer.getSong());
 	}
 	
-	private Song createSongFromNew(com.xxmicloxx.NoteBlockAPI.model.Song s){
-		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
-		for (Integer i : s.getLayerHashMap().keySet()){
-			com.xxmicloxx.NoteBlockAPI.model.Layer l = s.getLayerHashMap().get(i);
-			HashMap<Integer, Note> noteHashMap = new HashMap<Integer, Note>();
-			for (Integer iL : l.getNotesAtTicks().keySet()){
-				com.xxmicloxx.NoteBlockAPI.model.Note note = l.getNotesAtTicks().get(iL);
-				noteHashMap.put(iL, new Note(note.getInstrument(), note.getKey()));
-			}
+	private Song createSongFromNew(com.xxmicloxx.NoteBlockAPI.model.Song song){
+		HashMap<Integer, Layer> layerMap = new HashMap<>(song.getLayerHashMap().size());
+		song.getLayerHashMap().forEach((key, l) -> {
+			HashMap<Integer, Note> nodeMap = new HashMap<>(l.getNotesAtTicks().size());
+			l.getNotesAtTicks().forEach((innerKey, note) -> {
+				nodeMap.put(innerKey, new Note(note.getInstrument(), note.getKey()));
+			});
 			Layer layer = new Layer();
-			layer.setHashMap(noteHashMap);
+			layer.setHashMap(nodeMap);
 			layer.setVolume(l.getVolume());
-			layerHashMap.put(i, layer);
-		}
-		com.xxmicloxx.NoteBlockAPI.CustomInstrument[] instruments = new com.xxmicloxx.NoteBlockAPI.CustomInstrument[s.getCustomInstruments().length];
-		for (int i = 0; i < s.getCustomInstruments().length; i++){
-			com.xxmicloxx.NoteBlockAPI.model.CustomInstrument ci = s.getCustomInstruments()[i];
+			layerMap.put(key, layer);
+		});
+
+		com.xxmicloxx.NoteBlockAPI.CustomInstrument[] instruments = new com.xxmicloxx.NoteBlockAPI.CustomInstrument[song.getCustomInstruments().length];
+		for (int i = 0; i < song.getCustomInstruments().length; i++){
+			com.xxmicloxx.NoteBlockAPI.model.CustomInstrument ci = song.getCustomInstruments()[i];
 			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundFileName());
 		}
 		
-		return new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
+		return new Song(song.getSpeed(), layerMap, song.getSongHeight(), song.getLength(), song.getTitle(), song.getAuthor(), song.getDescription(), song.getPath(), instruments);
 	}
 
 	void update(String key, Object value){
