@@ -174,6 +174,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	private Future<?> commonTask;
 
 	private List<Delayed> delayeds = new LinkedList<>();
+	private List<Delayed> newDelayeds = new ArrayList<>(1);
 
 	{
 		this.runCommonTaskIfNotExists();
@@ -186,6 +187,11 @@ public class NoteBlockAPI extends JavaPlugin {
 
 		commonTask = this.submit.submit(() -> {
 			while (true) {
+				if (!newDelayeds.isEmpty()) {
+					delayeds.addAll(newDelayeds);
+					newDelayeds.clear();
+				}
+
 				if (delayeds.isEmpty()) {
 					break;
 				}
@@ -221,7 +227,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	}
 
 	public void doDelayed(Delayed delayed) {
-		this.delayeds.add(delayed);
+		this.newDelayeds.add(delayed);
 		this.runCommonTaskIfNotExists();
 	}
 
