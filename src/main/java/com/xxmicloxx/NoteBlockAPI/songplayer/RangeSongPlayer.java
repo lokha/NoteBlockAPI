@@ -3,7 +3,7 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 import org.bukkit.entity.Player;
 
 import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
 /**

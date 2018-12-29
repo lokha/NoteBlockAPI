@@ -17,12 +17,12 @@ import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongLoopEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongNextEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent;
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
-import com.xxmicloxx.NoteBlockAPI.model.FadeType;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
+import com.xxmicloxx.NoteBlockAPI.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.FadeType;
+import com.xxmicloxx.NoteBlockAPI.Layer;
+import com.xxmicloxx.NoteBlockAPI.Note;
 import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
 
@@ -90,26 +90,7 @@ public abstract class SongPlayer {
 	
 	SongPlayer(com.xxmicloxx.NoteBlockAPI.SongPlayer songPlayer){
 		oldSongPlayer = songPlayer;
-		com.xxmicloxx.NoteBlockAPI.Song s = songPlayer.getSong();
-		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
-		for (Integer i : s.getLayerHashMap().keySet()){
-			com.xxmicloxx.NoteBlockAPI.Layer l = s.getLayerHashMap().get(i);
-			HashMap<Integer, Note> noteHashMap = new HashMap<Integer, Note>();
-			for (Integer iL : l.getHashMap().keySet()){
-				com.xxmicloxx.NoteBlockAPI.Note note = l.getHashMap().get(iL);
-				noteHashMap.put(iL, new Note(note.getInstrument(), note.getKey()));
-			}
-			Layer layer = new Layer();
-			layer.setNotesAtTicks(noteHashMap);
-			layer.setVolume(l.getVolume());
-			layerHashMap.put(i, layer);
-		}
-		CustomInstrument[] instruments = new CustomInstrument[s.getCustomInstruments().length];
-		for (int i = 0; i < s.getCustomInstruments().length; i++){
-			com.xxmicloxx.NoteBlockAPI.CustomInstrument ci = s.getCustomInstruments()[i];
-			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundfile());
-		}
-		song = new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
+		song = songPlayer.getSong();
 		playlist = new Playlist(song);
 		
 		fadeIn = new Fade(FadeType.NONE, 60);

@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 
 /**
- * @deprecated {@link com.xxmicloxx.NoteBlockAPI.model.Song}
+ * Represents a Note Block Studio project
+ *
  */
-@Deprecated
 public class Song implements Cloneable {
 
 	private HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
@@ -20,6 +20,10 @@ public class Song implements Cloneable {
 	private float delay;
 	private CustomInstrument[] customInstruments;
 
+	/**
+	 * Create Song instance by copying other Song parameters
+	 * @param other song
+	 */
 	public Song(Song other) {
 		this(other.getSpeed(), other.getLayerHashMap(), other.getSongHeight(), 
 				other.getLength(), other.getTitle(), other.getAuthor(), 
@@ -32,7 +36,7 @@ public class Song implements Cloneable {
 		this(speed, layerHashMap, songHeight, length, title, author, description, path, new CustomInstrument[0]);
 	}
 
-	public Song(float speed, HashMap<Integer, Layer> layerHashMap, 
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
 			short songHeight, final short length, String title, String author, 
 			String description, File path, CustomInstrument[] customInstruments) {
 		this.speed = speed;
@@ -132,5 +136,7 @@ public class Song implements Cloneable {
 	public Song clone() {
 		return new Song(this);
 	}
+
+	
 
 }

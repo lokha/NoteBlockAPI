@@ -4,7 +4,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.Song;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 
 public class SongLoopEvent extends Event implements Cancellable {

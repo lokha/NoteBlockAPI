@@ -47,7 +47,7 @@ public class RadioSongPlayer extends SongPlayer {
 							this.soundCategory, volume, pitch);
 				} else {
 					CompatibilityUtils.playSound(player, player.getEyeLocation(),
-							instrument.getSoundfile(),
+							instrument.getSound(),
 							this.soundCategory, volume, pitch);
 				}
 			} else {

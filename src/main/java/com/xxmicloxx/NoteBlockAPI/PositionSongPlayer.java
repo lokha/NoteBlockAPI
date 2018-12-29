@@ -76,7 +76,7 @@ public class PositionSongPlayer extends SongPlayer {
 					CompatibilityUtils.playSound(player, targetLocation, instrument.getSound(),
 							this.soundCategory, volume, pitch);
 				} else {
-					CompatibilityUtils.playSound(player, targetLocation, instrument.getSoundfile(),
+					CompatibilityUtils.playSound(player, targetLocation, instrument.getSound(),
 							this.soundCategory, volume, pitch);
 				}
 			} else {

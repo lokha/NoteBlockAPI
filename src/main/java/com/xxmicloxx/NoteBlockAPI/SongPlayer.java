@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -26,14 +27,12 @@ public abstract class SongPlayer {
 	protected boolean autoDestroy = false;
 	protected boolean destroyed = false;
 
-	protected Thread playerThread;
-
 	protected byte volume = 100;
 	protected byte fadeStart = volume;
 	protected byte fadeTarget = 100;
 	protected int fadeDuration = 60;
 	protected int fadeDone = 0;
-	protected FadeType fadeType = FadeType.FADE_LINEAR;
+	protected FadeType fadeType = FadeType.LINEAR;
 
 	private final Lock lock = new ReentrantLock();
 
@@ -58,29 +57,7 @@ public abstract class SongPlayer {
 	
 	SongPlayer(com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer songPlayer){
 		newSongPlayer = songPlayer;
-		song = createSongFromNew(songPlayer.getSong());
-	}
-	
-	private Song createSongFromNew(com.xxmicloxx.NoteBlockAPI.model.Song song){
-		HashMap<Integer, Layer> layerMap = new HashMap<>(song.getLayerHashMap().size());
-		song.getLayerHashMap().forEach((key, l) -> {
-			HashMap<Integer, Note> nodeMap = new HashMap<>(l.getNotesAtTicks().size());
-			l.getNotesAtTicks().forEach((innerKey, note) -> {
-				nodeMap.put(innerKey, new Note(note.getInstrument(), note.getKey()));
-			});
-			Layer layer = new Layer();
-			layer.setHashMap(nodeMap);
-			layer.setVolume(l.getVolume());
-			layerMap.put(key, layer);
-		});
-
-		com.xxmicloxx.NoteBlockAPI.CustomInstrument[] instruments = new com.xxmicloxx.NoteBlockAPI.CustomInstrument[song.getCustomInstruments().length];
-		for (int i = 0; i < song.getCustomInstruments().length; i++){
-			com.xxmicloxx.NoteBlockAPI.model.CustomInstrument ci = song.getCustomInstruments()[i];
-			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundFileName());
-		}
-		
-		return new Song(song.getSpeed(), layerMap, song.getSongHeight(), song.getLength(), song.getTitle(), song.getAuthor(), song.getDescription(), song.getPath(), instruments);
+		song = songPlayer.getSong();
 	}
 
 	void update(String key, Object value){
@@ -122,7 +99,7 @@ public abstract class SongPlayer {
 				soundCategory = SoundCategory.valueOf((String) value);
 				break;
 			case "song":
-				song = createSongFromNew((com.xxmicloxx.NoteBlockAPI.model.Song) value);
+				song = (Song) value;
 				break;
 				
 		}

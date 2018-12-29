@@ -9,7 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.CustomInstrument;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
 /**

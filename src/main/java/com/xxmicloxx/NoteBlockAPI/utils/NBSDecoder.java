@@ -14,10 +14,10 @@ import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.Layer;
+import com.xxmicloxx.NoteBlockAPI.Note;
+import com.xxmicloxx.NoteBlockAPI.Song;
 
 /**
  * Utils for reading Note Block Studio data

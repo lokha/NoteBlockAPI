@@ -92,7 +92,7 @@ public class NoteBlockSongPlayer extends SongPlayer {
 							instrument.getSound(), this.soundCategory, volume, pitch);
 				} else {
 					CompatibilityUtils.playSound(player, noteBlock.getLocation(), 
-							instrument.getSoundfile(), this.soundCategory, volume, pitch);
+							instrument.getSound(), this.soundCategory, volume, pitch);
 				}
 			} else {
 				CompatibilityUtils.playSound(player, noteBlock.getLocation(),

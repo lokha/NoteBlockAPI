@@ -1,6 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
-import com.xxmicloxx.NoteBlockAPI.model.FadeType;
+import com.xxmicloxx.NoteBlockAPI.FadeType;
 import com.xxmicloxx.NoteBlockAPI.utils.Interpolator;
 
 public class Fade {

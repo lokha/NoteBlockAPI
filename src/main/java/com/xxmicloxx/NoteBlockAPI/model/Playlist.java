@@ -1,5 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import com.xxmicloxx.NoteBlockAPI.Song;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

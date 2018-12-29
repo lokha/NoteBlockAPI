@@ -3,12 +3,12 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 import org.bukkit.entity.Player;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.NotePitch;
+import com.xxmicloxx.NoteBlockAPI.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.Layer;
+import com.xxmicloxx.NoteBlockAPI.Note;
+import com.xxmicloxx.NoteBlockAPI.NotePitch;
 import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
