@@ -189,6 +189,7 @@ public class NoteBlockAPI extends JavaPlugin {
 			while (true) {
 				if (!newDelayeds.isEmpty()) {
 					delayeds.addAll(newDelayeds);
+					plugin.getLogger().info("Запускаем новые песни +" + newDelayeds.size() + ". Теперь играет " + delayeds.size() + " песен.");
 					newDelayeds.clear();
 				}
 
@@ -202,6 +203,7 @@ public class NoteBlockAPI extends JavaPlugin {
 						Delayed delayed = iterator.next();
 						if (delayed.isDone()) {
 							iterator.remove();
+							plugin.getLogger().info("Выключаем 1 песню. Теперь играет " + delayeds.size() + " песен.");
 						} else {
 							long current = System.currentTimeMillis();
 							if (current >= delayed.nextTimePlay()) {
