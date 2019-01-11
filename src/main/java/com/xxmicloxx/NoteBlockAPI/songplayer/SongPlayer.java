@@ -38,12 +38,10 @@ public abstract class SongPlayer {
 
 	protected boolean playing = false;
 	protected short tick = -1;
-	protected Map<UUID, Boolean> playerList = Collections.synchronizedMap(new HashMap<UUID, Boolean>());
+	protected Map<UUID, Boolean> playerList = Collections.synchronizedMap(new HashMap<>());
 
 	protected boolean autoDestroy = false;
 	protected boolean destroyed = false;
-
-	protected Thread playerThread;
 
 	protected byte volume = 100;
 	protected Fade fadeIn;
@@ -260,17 +258,10 @@ public abstract class SongPlayer {
 			public void play() {
 				long startTime = System.currentTimeMillis();
 				lock.lock();
+
+				boolean anyOnlinePlayer = false;
 				try {
 					if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
-						return;
-					}
-
-					List<Player> online = playerList.keySet().stream()
-							.map(Bukkit::getPlayer)
-							.filter(Objects::nonNull)
-							.collect(Collectors.toList());
-					if (online.isEmpty() && !playerList.isEmpty()) {
-						destroy();
 						return;
 					}
 
@@ -324,8 +315,12 @@ public abstract class SongPlayer {
 						}
 						CallUpdate("tick", tick);
 
-						for (Player player : online) {
-							playTick(player, tick);
+						for (UUID uuid : playerList.keySet()) {
+							Player player = Bukkit.getPlayer(uuid);
+							if (player != null) {
+								anyOnlinePlayer = true;
+								playTick(player, tick);
+							}
 						}
 					}
 				} catch (Exception e) {
@@ -343,6 +338,10 @@ public abstract class SongPlayer {
 				float delayMillis = song.getDelay() * 50;
 
 				nextTimePlay = current + (long) (delayMillis - duration);
+
+				if (!anyOnlinePlayer && !playerList.isEmpty()) {
+					destroy();
+				}
 			}
 
 			@Override
