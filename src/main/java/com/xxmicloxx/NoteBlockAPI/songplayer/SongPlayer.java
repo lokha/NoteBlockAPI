@@ -48,8 +48,6 @@ public abstract class SongPlayer {
 	protected Fade fadeOut;
 	protected boolean loop = false;
 
-	private final Lock lock = new ReentrantLock();
-
 	protected NoteBlockAPI plugin;
 
 	protected SoundCategory soundCategory;
@@ -257,7 +255,6 @@ public abstract class SongPlayer {
 			@Override
 			public void play() {
 				long startTime = System.currentTimeMillis();
-				lock.lock();
 
 				boolean anyOnlinePlayer = false;
 				try {
@@ -325,8 +322,6 @@ public abstract class SongPlayer {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-				} finally {
-					lock.unlock();
 				}
 
 				if (destroyed) {
@@ -399,25 +394,20 @@ public abstract class SongPlayer {
 	}
 	
 	private void addPlayer(UUID player, boolean notify){
-		lock.lock();
-		try {
-			if (!playerList.containsKey(player)) {
-				playerList.put(player, false);
-				ArrayList<SongPlayer> songs = NoteBlockAPI.getSongPlayersByPlayer(player);
-				if (songs == null) {
-					songs = new ArrayList<SongPlayer>();
-				}
-				songs.add(this);
-				NoteBlockAPI.setSongPlayersByPlayer(player, songs);
-				if (notify){
-					Player p = Bukkit.getPlayer(player);
-					if (p != null){
-						CallUpdate("addplayer", p);
-					}
+		if (!playerList.containsKey(player)) {
+			playerList.put(player, false);
+			ArrayList<SongPlayer> songs = NoteBlockAPI.getSongPlayersByPlayer(player);
+			if (songs == null) {
+				songs = new ArrayList<SongPlayer>();
+			}
+			songs.add(this);
+			NoteBlockAPI.setSongPlayersByPlayer(player, songs);
+			if (notify){
+				Player p = Bukkit.getPlayer(player);
+				if (p != null){
+					CallUpdate("addplayer", p);
 				}
 			}
-		} finally {
-			lock.unlock();
 		}
 	}
 
@@ -427,12 +417,7 @@ public abstract class SongPlayer {
 	 * @return if autoDestroy is enabled
 	 */
 	public boolean getAutoDestroy() {
-		lock.lock();
-		try {
-			return autoDestroy;
-		} finally {
-			lock.unlock();
-		}
+		return autoDestroy;
 	}
 
 	/**
@@ -441,13 +426,8 @@ public abstract class SongPlayer {
 	 * @param autoDestroy if autoDestroy is enabled
 	 */
 	public void setAutoDestroy(boolean autoDestroy) {
-		lock.lock();
-		try {
-			this.autoDestroy = autoDestroy;
-			CallUpdate("autoDestroy", autoDestroy);
-		} finally {
-			lock.unlock();
-		}
+		this.autoDestroy = autoDestroy;
+		CallUpdate("autoDestroy", autoDestroy);
 	}
 
 	/**
@@ -461,22 +441,17 @@ public abstract class SongPlayer {
 	 * SongPlayer will destroy itself
 	 */
 	public void destroy() {
-		lock.lock();
-		try {
-			SongDestroyingEvent event = new SongDestroyingEvent(this);
-			Bukkit.getPluginManager().callEvent(event);
-			//Bukkit.getScheduler().cancelTask(threadId);
-			if (event.isCancelled()) {
-				return;
-			}
-			destroyed = true;
-			playing = false;
-			setTick((short) -1);
-			CallUpdate("destroyed", destroyed);
-			CallUpdate("playing", playing);
-		} finally {
-			lock.unlock();
+		SongDestroyingEvent event = new SongDestroyingEvent(this);
+		Bukkit.getPluginManager().callEvent(event);
+		//Bukkit.getScheduler().cancelTask(threadId);
+		if (event.isCancelled()) {
+			return;
 		}
+		destroyed = true;
+		playing = false;
+		setTick((short) -1);
+		CallUpdate("destroyed", destroyed);
+		CallUpdate("playing", playing);
 	}
 
 	/**
@@ -534,29 +509,24 @@ public abstract class SongPlayer {
 	}
 	
 	private void removePlayer(UUID player, boolean notify) {
-		lock.lock();
-		try {
-			if (notify){
-				Player p = Bukkit.getPlayer(player);
-				if (p != null){
-					CallUpdate("removeplayer", p);
-				}
+		if (notify){
+			Player p = Bukkit.getPlayer(player);
+			if (p != null){
+				CallUpdate("removeplayer", p);
 			}
-			playerList.remove(player);
-			if (NoteBlockAPI.getSongPlayersByPlayer(player) == null) {
-				return;
-			}
-			ArrayList<SongPlayer> songs = new ArrayList<>(
-					NoteBlockAPI.getSongPlayersByPlayer(player));
-			songs.remove(this);
-			NoteBlockAPI.setSongPlayersByPlayer(player, songs);
-			if (playerList.isEmpty() && autoDestroy) {
-				SongEndEvent event = new SongEndEvent(this);
-				Bukkit.getPluginManager().callEvent(event);
-				destroy();
-			}
-		} finally {
-			lock.unlock();
+		}
+		playerList.remove(player);
+		if (NoteBlockAPI.getSongPlayersByPlayer(player) == null) {
+			return;
+		}
+		ArrayList<SongPlayer> songs = new ArrayList<>(
+				NoteBlockAPI.getSongPlayersByPlayer(player));
+		songs.remove(this);
+		NoteBlockAPI.setSongPlayersByPlayer(player, songs);
+		if (playerList.isEmpty() && autoDestroy) {
+			SongEndEvent event = new SongEndEvent(this);
+			Bukkit.getPluginManager().callEvent(event);
+			destroy();
 		}
 	}
 
@@ -623,20 +593,15 @@ public abstract class SongPlayer {
 	 * @param index
 	 */
 	public void playSong(int index){
-		lock.lock();
-		try {
-			if (playlist.exist(index)){
-				song = playlist.get(index);
-				actualSong = index;
-				tick = -1;
-				fadeIn.setFadeDone(0);
-				fadeOut.setFadeDone(0);
-				CallUpdate("song", song);
-				CallUpdate("fadeDone", fadeIn.getFadeDone());
-				CallUpdate("tick", tick);
-			}
-		} finally {
-			lock.unlock();
+		if (playlist.exist(index)){
+			song = playlist.get(index);
+			actualSong = index;
+			tick = -1;
+			fadeIn.setFadeDone(0);
+			fadeOut.setFadeDone(0);
+			CallUpdate("song", song);
+			CallUpdate("fadeDone", fadeIn.getFadeDone());
+			CallUpdate("tick", tick);
 		}
 	}
 
