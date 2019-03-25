@@ -201,17 +201,24 @@ public class NoteBlockAPI extends JavaPlugin {
 					long minNextTime = -1;
 					for (Iterator<Delayed> iterator = delayeds.iterator(); iterator.hasNext(); ) {
 						Delayed delayed = iterator.next();
-						if (delayed.isDone()) {
-							iterator.remove();
-							plugin.getLogger().info("Выключаем 1 песню. Теперь играет " + delayeds.size() + " песен.");
-						} else {
-							long current = System.currentTimeMillis();
-							if (current >= delayed.nextTimePlay()) {
-								delayed.play();
+						try {
+							if (delayed == null || delayed.isDone()) {
+								iterator.remove();
+								plugin.getLogger().info("Выключаем 1 песню. Теперь играет " + delayeds.size() + " песен.");
+							} else {
+								long current = System.currentTimeMillis();
+								if (current >= delayed.nextTimePlay()) {
+									delayed.play();
+								}
+								minNextTime = minNextTime == -1 ?
+										delayed.nextTimePlay() :
+										Math.min(minNextTime, delayed.nextTimePlay());
 							}
-							minNextTime = minNextTime == -1 ?
-									delayed.nextTimePlay() :
-									Math.min(minNextTime, delayed.nextTimePlay());
+						} catch (InterruptedException e) {
+							break;
+						} catch (Exception e) {
+							iterator.remove();
+							e.printStackTrace();
 						}
 					}
 
